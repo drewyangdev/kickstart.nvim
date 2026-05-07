@@ -197,6 +197,8 @@ vim.o.confirm = true
 -- autowrite/autosave
 -- vim.o.autowriteall = true
 
+-- ruler
+vim.opt.colorcolumn = "80,100"
 
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
