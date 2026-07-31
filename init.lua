@@ -671,15 +671,30 @@ require('lazy').setup({
       ---@type table<string, vim.lsp.Config>
       local servers = {
         -- clangd = {},
-        -- gopls = {},
-        -- pyright = {},
-        -- rust_analyzer = {},
-        --
+
+        -- Go: the official Go language server.
+        gopls = {},
+
+        -- Python: pyright for type-checking / go-to-definition / hover,
+        -- and ruff for fast linting + formatting (ruff handles the "diagnostics"
+        -- side while pyright handles type intelligence).
+        pyright = {},
+        ruff = {},
+
+        -- Rust.
+        rust_analyzer = {},
+
+        -- TypeScript / JavaScript (.ts/.tsx/.js/.jsx).
         -- Some languages (like typescript) have entire language plugins that can be useful:
         --    https://github.com/pmizio/typescript-tools.nvim
-        --
-        -- But for many setups, the LSP (`ts_ls`) will work just fine
-        -- ts_ls = {},
+        -- But for many setups, the LSP (`ts_ls`) will work just fine.
+        ts_ls = {},
+
+        -- Java. NOTE: jdtls is a heavy server and, for advanced projects
+        -- (multi-module Maven/Gradle, debugging), the `nvim-jdtls` plugin is the
+        -- recommended path. This basic mason setup is fine for single-file /
+        -- simple projects. See the note I left you after this change.
+        jdtls = {},
 
         stylua = {}, -- Used to format Lua code
 
@@ -782,8 +797,8 @@ require('lazy').setup({
     },
   },
 
-  -- Disabled: using minuet-ai virtualtext for AI completion instead. Re-enable by removing the --[[ and --]] markers.
-  --[[
+  -- Re-enabled alongside minuet-ai: blink.cmp provides the LSP completion menu
+  -- (methods, fields, imports) while minuet-ai keeps its AI virtual-text suggestions.
   { -- Autocompletion
     'saghen/blink.cmp',
     event = 'VimEnter',
@@ -839,7 +854,14 @@ require('lazy').setup({
         -- <c-k>: Toggle signature help
         --
         -- See :h blink-cmp-config-keymap for defining your own keymap
-        preset = 'default',
+        preset = 'enter',
+
+        -- Manually invoke minuet (AI) completions in the menu. Handy even with
+        -- auto-complete on, e.g. to force a fresh AI suggestion. This is exactly
+        -- what `require('minuet').make_blink_map()` returns, inlined so we don't
+        -- `require('minuet')` while this spec table is built (it isn't on the rtp
+        -- that early). `cmp.show` triggers only the minuet provider.
+        ['<A-y>'] = { function(cmp) cmp.show { providers = { 'minuet' } } end },
 
         -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
         --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
@@ -855,10 +877,23 @@ require('lazy').setup({
         -- By default, you may press `<c-space>` to show the documentation.
         -- Optionally, set `auto_show = true` to show the documentation after a delay.
         documentation = { auto_show = false, auto_show_delay_ms = 500 },
+        -- Recommended by minuet: avoids firing an AI request on every insert-enter.
+        trigger = { prefetch_on_insert = false },
       },
 
       sources = {
-        default = { 'lsp', 'path', 'snippets' },
+        -- 'minuet' surfaces AI completions from minuet-ai.nvim in this menu.
+        default = { 'lsp', 'path', 'snippets', 'minuet' },
+        providers = {
+          minuet = {
+            name = 'minuet',
+            module = 'minuet.blink',
+            async = true,
+            -- Should match minuet's request_timeout (seconds) * 1000. Default is 3s.
+            timeout_ms = 3000,
+            score_offset = 50, -- Rank minuet suggestions above other sources.
+          },
+        },
       },
 
       snippets = { preset = 'luasnip' },
@@ -876,7 +911,6 @@ require('lazy').setup({
       signature = { enabled = true },
     },
   },
-  --]]
 
   -- Going to use OneDark
   --{ -- You can easily change to a different colorscheme.

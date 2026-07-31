@@ -92,6 +92,19 @@ return {
         },
       },
 
+      -- Surface minuet's AI suggestions inside the blink.cmp popup menu
+      -- (see blink.cmp `sources`/`providers` config in init.lua). `enable_auto_complete`
+      -- makes minuet request completions automatically as you type, like other sources.
+      blink = {
+        enable_auto_complete = true,
+      },
+
+      -- Ghost-text (virtualtext) mode is DISABLED in favor of the blink.cmp menu above.
+      -- Running both would fire duplicate AI requests for the same completion.
+      -- To go back to inline ghost text: remove the `--[[` / `--]]` markers below,
+      -- and set `blink.enable_auto_complete = false` (or remove 'minuet' from blink's
+      -- sources.default in init.lua).
+      --[[
       virtualtext = {
         -- Filetypes where suggestions auto-appear as you type.
         -- These cover the source/config files used in ~/work/arizetree/arize, plus lua for nvim config.
@@ -144,6 +157,7 @@ return {
           dismiss = '<A-e>',        -- Dismiss current suggestion
         },
       },
+      --]]
     }
   end,
 }
