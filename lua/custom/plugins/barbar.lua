@@ -8,6 +8,11 @@
 ---@type LazySpec
 return {
   'romgrk/barbar.nvim',
+  -- Load barbar at startup (just after the UI is ready) so the tabline is
+  -- visible right away. Without this, the `keys` below would make lazy.nvim
+  -- defer loading until you first press one of the Alt-key shortcuts, so the
+  -- tabline wouldn't appear until then.
+  event = 'VeryLazy',
   dependencies = {
     'lewis6991/gitsigns.nvim', -- optional: shows git status (added/changed) on each tab
     'nvim-tree/nvim-web-devicons', -- optional: file-type icons on each tab
